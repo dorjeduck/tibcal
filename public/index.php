@@ -60,7 +60,11 @@ $yearOptions = !empty($names['ok']) ? $names['years'] : [];
       <h2>Western&nbsp;→&nbsp;Tibetan</h2>
       <label class="field">
         <span>Year</span>
-        <input type="number" name="year" value="<?= $gYear ?>" min="1" max="3000" required>
+        <select name="year">
+          <?php for ($y = $yearRange['from']; $y <= $yearRange['to']; $y++): ?>
+            <option value="<?= $y ?>"<?= $y === $gYear ? ' selected' : '' ?>><?= $y ?></option>
+          <?php endfor; ?>
+        </select>
       </label>
       <div class="field-row">
         <label class="field">
