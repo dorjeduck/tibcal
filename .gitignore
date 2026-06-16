@@ -1,0 +1,9 @@
+# Per-server configuration (interpreter path) — never committed.
+config.php
+
+# Python bytecode cache.
+__pycache__/
+*.pyc
+
+# macOS.
+.DS_Store
