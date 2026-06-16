@@ -153,11 +153,26 @@ button[type="submit"]:active { transform: translateY(1px); }
 
 /* results */
 .result {
+  position: relative;
   border-top: 1px solid var(--line);
   padding-top: 1rem;
+  padding-bottom: 1.6rem;
   margin-top: .2rem;
 }
 .result.error .note { color: var(--accent); }
+
+.result-clear {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: .2rem;
+  line-height: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.result-clear:hover { color: var(--accent); }
 
 .result .big {
   font-size: 1.15rem;

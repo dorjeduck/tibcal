@@ -18,6 +18,26 @@ function annotations(d) {
   return parts;
 }
 
+// Add a clear button to a shown result box. Clicking it empties the box and
+// drops that direction's URL param, so a shared link can carry just one result.
+function decorateClear(box) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'result-clear';
+  btn.title = 'Clear this result';
+  btn.setAttribute('aria-label', 'Clear this result');
+  btn.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.65 8A5.65 5.65 0 1 1 11.9 3.93"/><path d="M13.5 2.5V6H10"/></svg>';
+  btn.addEventListener('click', () => {
+    box.hidden = true;
+    box.classList.remove('error');
+    box.innerHTML = '';
+    const url = new URL(window.location);
+    url.searchParams.delete(box.id === 'result-g2t' ? 'western' : 'tibetan');
+    history.replaceState(null, '', url);
+  });
+  box.appendChild(btn);
+}
+
 function renderTibetan(box, r) {
   const yn = r.year_name;
   const notes = annotations(r);
@@ -31,18 +51,21 @@ function renderTibetan(box, r) {
     </dl>
     ${notes.length ? `<p class="note">This is a ${notes.join(' and ')}.</p>` : ''}
   `;
+  decorateClear(box);
 }
 
 function renderWestern(box, g) {
   box.hidden = false;
   box.classList.remove('error');
   box.innerHTML = `<div class="big">${escapeHtml(g.display)}</div>`;
+  decorateClear(box);
 }
 
 function showError(box, msg) {
   box.hidden = false;
   box.classList.add('error');
   box.innerHTML = `<p class="note">${escapeHtml(msg)}</p>`;
+  decorateClear(box);
 }
 
 function setBusy(box) {
@@ -82,6 +105,7 @@ function renderWesternMulti(box, cands) {
   box.innerHTML =
     `<p class="note">This Tibetan date occurs twice this year — both matches:</p>` +
     `<div class="multi">${rows}</div>`;
+  decorateClear(box);
 }
 
 // --- shareable URL state ---------------------------------------------------
