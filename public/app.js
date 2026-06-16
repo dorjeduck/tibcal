@@ -84,10 +84,33 @@ function renderWesternMulti(box, cands) {
     `<div class="multi">${rows}</div>`;
 }
 
+// --- shareable URL state ---------------------------------------------------
+// The URL mirrors what the user converted, so a link reproduces it. Readable
+// params (?tradition=phugpa&western=2026-06-16&tibetan=2026-5-15) — no server
+// config needed, and they double as a way to drive the tool by hand.
+
+const pad2 = (n) => String(n).padStart(2, '0');
+
+function setUrlParam(key, value) {
+  const url = new URL(window.location);
+  url.searchParams.set(key, value);
+  history.replaceState(null, '', url);
+}
+
+function clearUrlConversions() {
+  const url = new URL(window.location);
+  url.searchParams.delete('western');
+  url.searchParams.delete('tibetan');
+  history.replaceState(null, '', url);
+}
+
 // --- Western -> Tibetan ----------------------------------------------------
 
 document.getElementById('form-g2t').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const f = e.currentTarget;
+  setUrlParam('tradition', tradition());
+  setUrlParam('western', `${f.year.value}-${pad2(f.month.value)}-${pad2(f.day.value)}`);
   const box = document.getElementById('result-g2t');
   setBusy(box);
   try {
@@ -104,6 +127,9 @@ document.getElementById('form-g2t').addEventListener('submit', async (e) => {
 
 document.getElementById('form-t2g').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const f = e.currentTarget;
+  setUrlParam('tradition', tradition());
+  setUrlParam('tibetan', `${f.year.value}-${f.month.value}-${f.day.value}`);
   const box = document.getElementById('result-t2g');
   setBusy(box);
   try {
@@ -144,5 +170,42 @@ document.querySelectorAll('input[name="tradition"]').forEach((el) => {
       b.classList.remove('error');
       b.innerHTML = '';
     });
+    setUrlParam('tradition', tradition());
+    clearUrlConversions();
   });
 });
+
+// --- restore from a shared URL ---------------------------------------------
+// Pre-fill the form(s) from the query params and run whatever was shared.
+
+(function initFromUrl() {
+  const p = new URLSearchParams(window.location.search);
+
+  const trad = p.get('tradition');
+  if (trad === 'phugpa' || trad === 'tsurphu') {
+    const radio = document.querySelector(`input[name="tradition"][value="${trad}"]`);
+    if (radio) radio.checked = true;  // programmatic — does not fire 'change'
+  }
+
+  const datePattern = /^\d{4}-\d{1,2}-\d{1,2}$/;
+
+  const western = p.get('western');
+  if (western && datePattern.test(western)) {
+    const [y, m, d] = western.split('-').map(Number);
+    const f = document.getElementById('form-g2t');
+    f.year.value = String(y);
+    f.month.value = String(m);
+    f.day.value = String(d);
+    f.requestSubmit();
+  }
+
+  const tibetan = p.get('tibetan');
+  if (tibetan && datePattern.test(tibetan)) {
+    const [y, m, d] = tibetan.split('-').map(Number);
+    const f = document.getElementById('form-t2g');
+    f.year.value = String(y);
+    f.month.value = String(m);
+    f.day.value = String(d);
+    f.requestSubmit();
+  }
+})();
