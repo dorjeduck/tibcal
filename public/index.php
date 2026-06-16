@@ -143,15 +143,6 @@ $yearOptions = !empty($names['ok']) ? $names['years'] : [];
             </li>
     </p>
   </footer>
-
-  <dialog id="chooser" class="chooser">
-    <form method="dialog">
-      <h2>Which day do you mean?</h2>
-      <p class="note" id="chooser-note"></p>
-      <div class="choices" id="chooser-choices"></div>
-      <button type="submit" value="cancel" class="ghost">Cancel</button>
-    </form>
-  </dialog>
 </main>
 
 <script src="app.js"></script>

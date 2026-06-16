@@ -69,30 +69,25 @@ async function request(form, mode) {
   return res.json();
 }
 
-// --- chooser popup for ambiguous Tibetan dates -----------------------------
+// --- ambiguous Tibetan dates -----------------------------------------------
+// A day/month number can occur twice (a leap day or leap month duplicates it).
+// Show every match labelled by its Tibetan distinction — the user reads the one
+// they meant rather than choosing between Western dates they don't know yet.
 
-const chooser = document.getElementById('chooser');
-
-function openChooser(candidates, onPick) {
-  document.getElementById('chooser-note').textContent =
-    'This Tibetan date occurs more than once (a leap month and/or leap day ' +
-    'duplicates the number). Pick the one you mean:';
-  const wrap = document.getElementById('chooser-choices');
-  wrap.innerHTML = '';
-  candidates.forEach((c) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'choice';
-    btn.innerHTML =
-      `<span class="choice-label">${escapeHtml(c.label)}</span>` +
-      `<span class="choice-date">${escapeHtml(c.result.display)}</span>`;
-    btn.addEventListener('click', () => {
-      chooser.close();
-      onPick(c);
-    });
-    wrap.appendChild(btn);
-  });
-  chooser.showModal();
+function renderWesternMulti(box, cands) {
+  const unit = cands.some((c) => c.is_leap_day) ? 'day' : 'month';
+  const rows = cands.map((c) => {
+    const tag = (c.is_leap_day || c.is_leap_month) ? `leap ${unit}` : `regular ${unit}`;
+    return '<div class="multi-row">' +
+      `<span class="choice-label">${tag}</span>` +
+      `<span class="choice-date">${escapeHtml(c.result.display)}</span>` +
+      '</div>';
+  }).join('');
+  box.hidden = false;
+  box.classList.remove('error');
+  box.innerHTML =
+    `<p class="note">This Tibetan date occurs twice this year — both matches:</p>` +
+    `<div class="multi">${rows}</div>`;
 }
 
 // --- Western -> Tibetan ----------------------------------------------------
@@ -129,9 +124,7 @@ document.getElementById('form-t2g').addEventListener('submit', async (e) => {
     } else if (cands.length === 1) {
       renderWestern(box, cands[0].result);
     } else {
-      // Ambiguous: let the user choose, then show the picked date.
-      box.hidden = true;
-      openChooser(cands, (c) => renderWestern(box, c.result));
+      renderWesternMulti(box, cands);
     }
   } catch (err) {
     showError(box, 'Could not reach the converter. Please try again.');
