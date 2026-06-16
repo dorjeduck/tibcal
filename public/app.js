@@ -39,12 +39,6 @@ function renderWestern(box, g) {
   box.innerHTML = `<div class="big">${escapeHtml(g.display)}</div>`;
 }
 
-function showResult(box, html) {
-  box.hidden = false;
-  box.classList.remove('error');
-  box.innerHTML = html;
-}
-
 function showError(box, msg) {
   box.hidden = false;
   box.classList.add('error');
